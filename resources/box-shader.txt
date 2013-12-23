@@ -1,14 +1,14 @@
 #version 150
 
-uniform sampler2D tex;
+uniform sampler2D tex_box;
 
 
-in vec2 fragTexCoord;
+in vec2 fragTexCoord2;
 
-out vec4 finalColor;
+out vec4 finalColor2;
 
 void main() {
     //note: the texture function was called texture2D in older versions of GLSL
-    finalColor = texture(tex, fragTexCoord);
+    finalColor2 = texture(tex_box, fragTexCoord2);
     //gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
 }

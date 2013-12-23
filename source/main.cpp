@@ -35,10 +35,13 @@
 #include "tdogl/Camera.h"
 
 // constants
+//#define M_PI 3.1415926535897932384626433832795
 const glm::vec2 SCREEN_SIZE(800, 600);
 
 // globals
 tdogl::Texture* gTexture = NULL;
+tdogl::Texture* gTexture2 = NULL;
+
 tdogl::Program* gProgram = NULL;
 tdogl::Camera gCamera;
 GLuint gVAO = 0;
@@ -56,6 +59,7 @@ static void LoadShaders() {
     std::vector<tdogl::Shader> shaders;
     shaders.push_back(tdogl::Shader::shaderFromFile(ResourcePath("vertex-shader.txt"), GL_VERTEX_SHADER));
     shaders.push_back(tdogl::Shader::shaderFromFile(ResourcePath("fragment-shader.txt"), GL_FRAGMENT_SHADER));
+    //shaders.push_back(tdogl::Shader::shaderFromFile(ResourcePath("box-shader.txt"), GL_FRAGMENT_SHADER));
     gProgram = new tdogl::Program(shaders);
 }
 
@@ -69,58 +73,190 @@ static void LoadCube() {
     // make and bind the VBO
     glGenBuffers(1, &gVBO);
     glBindBuffer(GL_ARRAY_BUFFER, gVBO);
+    /*
+    float n_z = -gCamera.nearPlane();
+    float f_z = n_z - gCamera.farPlane()+ 3;
+    */
+
+    float alpha = M_PI/6.0f;
+    //float alpha = 30.0f;
+    float a = 0.75f;  //aspect ratio
+    float e = 1.0/glm::tan(alpha/2.0); 
+
+    float n = -e;  //near plane distance
+    std::cerr << e << std::endl;
+    float boxDepth = 10.0f;
+    float f_z = -2*e + 0.1f;
+    float n_z = n;
+    std::cerr << n_z << std::endl;
+
+    float beta = 2.0* glm::atan(a/e);
+    
+    float x = -n/e;
+    float r = x; //right edge of near plane
+    float l = -x;
+    
+    float y = -(a*n)/e;
+    float t = y; //top edge of near plane
+    float b =-y;
+    std::cerr << l << " , " << r << " , " << t << " , " << b << std::endl;
+    std::cerr << n_z  << " , " << f_z << std::endl;
+    //CONTROLLARE DIMENSIONI E POSIZIONE CUBI
+/*
+    float n_z = -20.0f;
+    float f_z = -99.0f;
+*/
     
     // Make a cube out of triangles (two triangles per side)
     GLfloat vertexData[] = {
         //  X     Y     Z       U     V
+       /*
         // bottom
-        -1.0f,-1.0f,-1.0f,   0.0f, 0.0f,
-         1.0f,-1.0f,-1.0f,   1.0f, 0.0f,
-        -1.0f,-1.0f, 1.0f,   0.0f, 1.0f,
-         1.0f,-1.0f,-1.0f,   1.0f, 0.0f,
-         1.0f,-1.0f, 1.0f,   1.0f, 1.0f,
-        -1.0f,-1.0f, 1.0f,   0.0f, 1.0f,
+        -0.2f,-0.2f,-4.4f,   0.0f, 0.0f,
+         0.2f,-0.2f,-4.4f,   1.0f, 0.0f,
+        -0.2f,-0.2f, -4.0f,   0.0f, 1.0f,
+         0.2f,-0.2f,-4.4f,   1.0f, 0.0f,
+         0.2f,-0.2f, -4.0f,   1.0f, 1.0f,
+        -0.2f,-0.2f, -4.0f,   0.0f, 1.0f,
 
         // top
-        -1.0f, 1.0f,-1.0f,   0.0f, 0.0f,
-        -1.0f, 1.0f, 1.0f,   0.0f, 1.0f,
-         1.0f, 1.0f,-1.0f,   1.0f, 0.0f,
-         1.0f, 1.0f,-1.0f,   1.0f, 0.0f,
-        -1.0f, 1.0f, 1.0f,   0.0f, 1.0f,
-         1.0f, 1.0f, 1.0f,   1.0f, 1.0f,
+        -0.2f, 0.2f,-4.4f,   0.0f, 0.0f,
+        -0.2f, 0.2f, -29.0f,   0.0f, 1.0f,
+         0.2f, 0.2f,-4.4f,   1.0f, 0.0f,
+         0.2f, 0.2f,-4.4f,   1.0f, 0.0f,
+        -0.2f, 0.2f, -29.0f,   0.0f, 1.0f,
+         0.2f, 0.2f, -29.0f,   1.0f, 1.0f,
 
         // front
-        -1.0f,-1.0f, 1.0f,   1.0f, 0.0f,
-         1.0f,-1.0f, 1.0f,   0.0f, 0.0f,
-        -1.0f, 1.0f, 1.0f,   1.0f, 1.0f,
-         1.0f,-1.0f, 1.0f,   0.0f, 0.0f,
-         1.0f, 1.0f, 1.0f,   0.0f, 1.0f,
-        -1.0f, 1.0f, 1.0f,   1.0f, 1.0f,
+        -0.2f,-0.2f, -4.0f,   1.0f, 0.0f,
+         0.2f,-0.2f, -4.0f,   0.0f, 0.0f,
+        -0.2f, 0.2f, -4.0f,   1.0f, 1.0f,
+         0.2f,-0.2f, -4.0f,   0.0f, 0.0f,
+         0.2f, 0.2f, -4.0f,   0.0f, 1.0f,
+        -0.2f, 0.2f, -4.0f,   1.0f, 1.0f,
 
         // back
-        -1.0f,-1.0f,-1.0f,   0.0f, 0.0f,
-        -1.0f, 1.0f,-1.0f,   0.0f, 1.0f,
-         1.0f,-1.0f,-1.0f,   1.0f, 0.0f,
-         1.0f,-1.0f,-1.0f,   1.0f, 0.0f,
-        -1.0f, 1.0f,-1.0f,   0.0f, 1.0f,
-         1.0f, 1.0f,-1.0f,   1.0f, 1.0f,
+        -0.2f,-0.2f,-4.4f,   0.0f, 0.0f,
+        -0.2f, 0.2f,-4.4f,   0.0f, 1.0f,
+         0.2,-0.2f,-4.4f,   1.0f, 0.0f,
+         0.2f,-0.2f,-4.4f,   1.0f, 0.0f,
+        -0.2f, 0.2f,-4.4f,   0.0f, 1.0f,
+         0.2f, 0.2f,-4.4f,   1.0f, 1.0f,
 
         // left
-        -1.0f,-1.0f, 1.0f,   0.0f, 1.0f,
-        -1.0f, 1.0f,-1.0f,   1.0f, 0.0f,
-        -1.0f,-1.0f,-1.0f,   0.0f, 0.0f,
-        -1.0f,-1.0f, 1.0f,   0.0f, 1.0f,
-        -1.0f, 1.0f, 1.0f,   1.0f, 1.0f,
-        -1.0f, 1.0f,-1.0f,   1.0f, 0.0f,
+        -0.2f,-0.2f, -4.0f,   0.0f, 1.0f,
+        -0.2f, 0.2f,-4.4f,   1.0f, 0.0f,
+        -0.2f,-0.2f,-4.4f,   0.0f, 0.0f,
+        -0.2f,-0.2f, -4.0f,   0.0f, 1.0f,
+        -0.2f, 0.2f, -4.0f,   1.0f, 1.0f,
+        -0.2f, 0.2f,-4.4f,   1.0f, 0.0f,
 
         // right
-         1.0f,-1.0f, 1.0f,   1.0f, 1.0f,
-         1.0f,-1.0f,-1.0f,   1.0f, 0.0f,
-         1.0f, 1.0f,-1.0f,   0.0f, 0.0f,
-         1.0f,-1.0f, 1.0f,   1.0f, 1.0f,
-         1.0f, 1.0f,-1.0f,   0.0f, 0.0f,
-         1.0f, 1.0f, 1.0f,   0.0f, 1.0f
+         0.2f,-0.2f, -4.0f,   1.0f, 1.0f,
+         0.2f,-0.2f,-4.4f,   1.0f, 0.0f,
+         0.2f, 0.2f,-4.4f,   0.0f, 0.0f,
+         0.2f,-0.2f, -4.0f,   1.0f, 1.0f,
+         0.2f, 0.2f,-4.4f,   0.0f, 0.0f,
+         0.2f, 0.2f, -4.0f,   0.0f, 1.0f,
+
+
+        //  X     Y     Z       U     V
+        // bottom
+        -0.4f,0.4f,-5.0f,   0.0f, 0.0f,
+        0.0f,0.4f,-5.0f,   1.0f, 0.0f,
+        -0.4f,0.4f,-4.6f,   0.0f, 1.0f,
+        0.0f,0.4f,-5.0f,   1.0f, 0.0f,
+        0.0f,0.4f,-4.6f,   1.0f, 1.0f,
+        -0.4f,0.4f,-4.6f,   0.0f, 1.0f,
+
+        // top
+        -0.4f, 0.0f,-5.0f,   0.0f, 0.0f,
+        -0.4f, 0.0f,-4.6f,   0.0f, 1.0f,
+         0.0f, 0.0f,-5.0f,   1.0f, 0.0f,
+         0.0f, 0.0f,-5.0f,   1.0f, 0.0f,
+        -0.4f, 0.0f,-4.6f,   0.0f, 1.0f,
+         0.0f, 0.0f,-4.6f,   1.0f, 1.0f,
+
+        // front
+        -0.4f,0.4f,-4.6f,   1.0f, 0.0f,
+        0.0f,0.4f,-4.6f,   0.0f, 0.0f,
+        -0.4f, 0.0f,-4.6f,   1.0f, 1.0f,
+        0.0f,0.4f,-4.6f,   0.0f, 0.0f,
+        0.0f, 0.0f,-4.6f,   0.0f, 1.0f,
+        -0.4f, 0.0f,-4.6f,   1.0f, 1.0f,
+
+        // back
+        -0.4f,0.4f,-5.0f,   0.0f, 0.0f,
+        -0.4f, 0.0f,-5.0f,   0.0f, 1.0f,
+        0.0f,0.4f,-5.0f,   1.0f, 0.0f,
+        0.0f,0.4f,-5.0f,   1.0f, 0.0f,
+        -0.4f, 0.0f,-5.0f,   0.0f, 1.0f,
+        0.0f, 0.0f,-5.0f,   1.0f, 1.0f,
+
+        // left
+        -0.4f, 0.4f,-4.6f,   0.0f, 1.0f,
+        -0.4f, 0.0f,-5.0f,   1.0f, 0.0f,
+        -0.4f, 0.4f,-5.0f,   0.0f, 0.0f,
+        -0.4f, 0.4f,-4.6f,   0.0f, 1.0f,
+        -0.4f, 0.0f,-4.6f,   1.0f, 1.0f,
+        -0.4f, 0.0f,-5.0f,   1.0f, 0.0f,
+
+        // right
+        0.0f, 0.4f,-4.6f,   1.0f, 1.0f,
+        0.0f, 0.4f,-5.0f,   1.0f, 0.0f,
+        0.0f, 0.0f,-5.0f,   0.0f, 0.0f,
+        0.0f, 0.4f,-4.6f,   1.0f, 1.0f,
+        0.0f, 0.0f,-5.0f,   0.0f, 0.0f,
+        0.0f, 0.0f,-4.6f,   0.0f, 1.0f,
+    */
+
+         //BOX
+         // bottom
+        l,b, n_z,   0.0f, 0.0f,
+         r,b, n_z,   1.0f, 0.0f,
+         r,b,f_z,   1.0f, 1.0f,
+         l,b,f_z,   0.0f, 1.0f,
+        l,b,n_z,   0.0f, 0.0f,
+        r,b, f_z,   1.0f, 1.0f,
+
+        // top
+        l, t, n_z,   0.0f, 0.0f,
+         r, t, n_z,   1.0f, 0.0f,
+         r, t,f_z,   1.0f, 1.0f,
+         l, t,f_z,   0.0f, 1.0f,
+        l, t,n_z,   0.0f, 0.0f,
+        r, t, f_z,   1.0f, 1.0f,
+        
+
+        // back
+        l,b,f_z,   0.0f, 0.0f,
+         r,b,f_z,   1.0f, 0.0f,
+         r, t,f_z,   1.0f, 1.0f,
+         l, t,f_z,   0.0f, 1.0f,
+        l,b,f_z,   0.0f, 0.0f,
+        r, t,f_z,   1.0f, 1.0f,
+
+        // left
+        l,b, n_z,   0.0f, 0.0f,
+        l,b,f_z,   1.0f, 0.0f,
+        l, t,f_z,   1.0f, 1.0f,
+        l, t,n_z,   0.0f, 1.0f,
+        l,b,n_z,   0.0f, 0.0f,
+        l, t,f_z,   1.0f, 1.0f,
+
+        // right
+         r,b, f_z,   0.0f, 0.0f,
+         r,b, n_z,   1.0f, 0.0f,
+         r,t, n_z,   1.0f, 1.0f,
+         r,t,f_z,   0.0f, 1.0f,
+         r,b, f_z,   0.0f, 0.0f,
+         r, t, n_z,  1.0f, 1.0f,
+
+
+        
     };
+
+
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
 
     // connect the xyz to the "vert" attribute of the vertex shader
@@ -131,6 +267,7 @@ static void LoadCube() {
     glEnableVertexAttribArray(gProgram->attrib("vertTexCoord"));
     glVertexAttribPointer(gProgram->attrib("vertTexCoord"), 2, GL_FLOAT, GL_TRUE,  5*sizeof(GLfloat), (const GLvoid*)(3 * sizeof(GLfloat)));
 
+
     // unbind the VAO
     glBindVertexArray(0);
 }
@@ -138,9 +275,13 @@ static void LoadCube() {
 
 // loads the file "wooden-crate.jpg" into gTexture
 static void LoadTexture() {
-    tdogl::Bitmap bmp = tdogl::Bitmap::bitmapFromFile(ResourcePath("wooden-crate.jpg"));
+    tdogl::Bitmap bmp = tdogl::Bitmap::bitmapFromFile(ResourcePath("grid2.jpg"));
     bmp.flipVertically();
     gTexture = new tdogl::Texture(bmp);
+
+    tdogl::Bitmap bmp2 = tdogl::Bitmap::bitmapFromFile(ResourcePath("box.jpg"));
+    bmp2.flipVertically();
+    gTexture2 = new tdogl::Texture(bmp2);
 }
 
 
@@ -158,7 +299,7 @@ static void Render() {
 
     // set the "model" uniform in the vertex shader, based on the gDegreesRotated global
     gProgram->setUniform("model", glm::translate(glm::mat4(1.0f),                       
-        glm::vec3(0.0f, 0.0f, -10.0f)));
+        glm::vec3(0.0f, 0.0f, 0.0f)));
       
     //gProgram->setUniform("model", glm::rotate(glm::mat4(), gDegreesRotated, glm::vec3(0,1,0)));
         
@@ -167,11 +308,18 @@ static void Render() {
      glBindTexture(GL_TEXTURE_2D, gTexture->object());
      gProgram->setUniform("tex", 0); //set to 0 because the texture is bound to GL_TEXTURE0
 
+     // bind the texture and set the "tex" uniform in the fragment shader
+    /* glActiveTexture(GL_TEXTURE0);
+     glBindTexture(GL_TEXTURE_2D, gTexture2->object());
+     gProgram->setUniform("tex_box", 0); //set to 0 because the texture is bound to GL_TEXTURE0
+*/
     // bind the VAO (the triangle)
     glBindVertexArray(gVAO);
     
     // draw the VAO
-    glDrawArrays(GL_TRIANGLES, 0, 6*2*3);
+
+    //glDrawArrays(GL_TRIANGLES, 0, 6*2*3);
+    glDrawArrays(GL_TRIANGLES, 0, 5*2*3);
     
     // unbind the VAO, the program and the texture
     glBindVertexArray(0);
@@ -208,10 +356,10 @@ void Update(float secondsElapsed) {
         gCamera.offsetPosition(secondsElapsed * moveSpeed * glm::vec3(0,1,0));
     }
     if(glfwGetKey('R')){
-        gCamera.setNearAndFarPlanes(gCamera.nearPlane() + 0.001f , 150.0f);
+        gCamera.setNearAndFarPlanes(gCamera.nearPlane() + 0.001f , gCamera.farPlane());
     }
     if(glfwGetKey('G')){
-        gCamera.setNearAndFarPlanes(gCamera.nearPlane() - 0.001f , 150.0f);
+        gCamera.setNearAndFarPlanes(gCamera.nearPlane() - 0.001f , gCamera.farPlane());
     }
 
     if(glfwGetKey('C')){

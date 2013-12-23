@@ -139,10 +139,10 @@ glm::mat4 Camera::matrix() const {
 }
 
 glm::mat4 Camera::projection() const {
-    float leftP   = -0.8f;
-    float rightP =  0.8f;
-    float topP    =  0.6f;
-    float bottomP = -0.6f;
+    float left   = -0.8f;
+    float right =  0.8f;
+    float top    =  0.6f;
+    float bottom = -0.6f;
 
     float d_near = _nearPlane;
     
@@ -150,37 +150,43 @@ glm::mat4 Camera::projection() const {
     glfwGetMousePos(&mouseX, &mouseY);
 
     glm::vec3 eye = glm::vec3(  (float)(mouseX) / 1000,
-                                -(float)(mouseY) / 1000 * 0.75f,
+                                (float)(mouseY) / 1000,
                                                 d_near);
 
-    std::cerr << eye.x << " , " << eye.y << " , " << eye.z << std::endl;
+   // std::cerr << eye.x << " , " << eye.y << " , " << eye.z << std::endl;
  
     float d_far = eye.z + abs(_farPlane) + 1;
 
-    float dirX =  eye.x;
-    float dirY =  eye.y;
+    float dirX = eye.x;
+    float dirY =  0.75*eye.y;
     float dirZ =  eye.z;
 
     /*** calcolo piani ****/
     
-   
+    /*
+    float bottom = bottomP + eye.y;
+    float top = bottom - 2*bottomP;
+    float left = leftP + eye.x;
+    float right = left - 2*leftP; 
+  */
+   /*
     
-    float top    =     topP - eye.y;
+    float top    =     topP - 0.75f*eye.y;
     float bottom =     top - 2*topP;
     float right  =   rightP - eye.x;
     float left   = right - 2*rightP;
-    
+    */
     /*** vettori per view matrix ****/
-    glm::vec3 view_dir = glm::vec3(0.0, 0.0, -1.0);
+    //glm::vec3 view_dir = glm::vec3(0.0, 0.0, -1.0);
     //glm::vec3 view_dir = eye - glm::vec3(-(right+left)/2,-(top-bottom)/(2/0.75f)
      //                                      , -dirZ);
-    //glm::vec3 view_dir =     glm::vec3(dirX, dirY, dirZ);
+    glm::vec3 view_dir =     glm::vec3(-dirX, -dirY, dirZ);
     glm::vec3 up       =           glm::vec3(0.0, 1.0, 0.0);
-    glm::vec3 n        =          glm::normalize(-view_dir);
+    glm::vec3 n        =          glm::normalize(view_dir);
 
-    //std::cerr << n.x << " , " << n.y << " , " << n.z << std::endl;
+    std::cerr << n.x << " , " << n.y << " , " << n.z << std::endl;
     glm::vec3 u        =  glm::normalize(glm::cross(up, n)); 
-    glm::vec3 v        =   glm::cross(n, u);
+    glm::vec3 v        =   glm::normalize(glm::cross(n, u));
     
     float d_x = -(glm::dot(eye, u));
     float d_y = -(glm::dot(eye, v));
@@ -194,14 +200,12 @@ glm::mat4 Camera::projection() const {
 
 
     /*** perspective matrix ***/
-    
     glm::mat4 P = glm::mat4(
         (2.0*d_near) / (right-left),                          0.0,         (right+left) / (right-left),                                  0.0, 
                                 0.0,  (2.0*d_near) / (top-bottom),         (top+bottom) / (top-bottom),                                  0.0,
                                 0.0,                          0.0,  -(d_far + d_near)/(d_far - d_near), -(2.0*d_far*d_near) / (d_far-d_near),
                                 0.0,                          0.0,                                -1.0,                                 0.0);
-    
-/*
+    /*
     glm::mat4 P = glm::mat4(
         (2.0*d_near) / (right-left),                          0.0,         (right+left) / (right-left), (-d_near*(right+left))/ right -left, 
                                 0.0,  (2.0*d_near) / (top-bottom),         (top+bottom) / (top-bottom),  (-d_near* (top+bottom))/ top-bottom,

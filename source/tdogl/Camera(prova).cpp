@@ -140,7 +140,7 @@ glm::mat4 Camera::matrix() const {
 
 glm::mat4 Camera::projection() const {
     float leftP   = -0.8f;
-    float rightP =  0.8f;
+    float rightP  =  0.8f;
     float topP    =  0.6f;
     float bottomP = -0.6f;
 
@@ -163,20 +163,27 @@ glm::mat4 Camera::projection() const {
 
     /*** calcolo piani ****/
     
-   
-    
+    float top    =     topP + eye.y;
+    float bottom =     bottomP  + eye.y;
+    float right  =   rightP + eye.x;
+    float left   = leftP + eye.x;
+  
+
+   /*
     float top    =     topP - eye.y;
-    float bottom =     top - 2*topP;
+    float bottom =     top  - 2*topP;
     float right  =   rightP - eye.x;
-    float left   = right - 2*rightP;
-    
+    float left   = right    - 2*rightP;
+    */
+
+
     /*** vettori per view matrix ****/
-    glm::vec3 view_dir = glm::vec3(0.0, 0.0, -1.0);
+   //glm::vec3 view_dir = glm::vec3(0.0, 0.0, 1.0);
     //glm::vec3 view_dir = eye - glm::vec3(-(right+left)/2,-(top-bottom)/(2/0.75f)
      //                                      , -dirZ);
-    //glm::vec3 view_dir =     glm::vec3(dirX, dirY, dirZ);
+    glm::vec3 view_dir =     glm::vec3(dirX, dirY, dirZ);
     glm::vec3 up       =           glm::vec3(0.0, 1.0, 0.0);
-    glm::vec3 n        =          glm::normalize(-view_dir);
+    glm::vec3 n        =          glm::normalize(view_dir);
 
     //std::cerr << n.x << " , " << n.y << " , " << n.z << std::endl;
     glm::vec3 u        =  glm::normalize(glm::cross(up, n)); 
@@ -203,12 +210,12 @@ glm::mat4 Camera::projection() const {
     
 /*
     glm::mat4 P = glm::mat4(
-        (2.0*d_near) / (right-left),                          0.0,         (right+left) / (right-left), (-d_near*(right+left))/ right -left, 
-                                0.0,  (2.0*d_near) / (top-bottom),         (top+bottom) / (top-bottom),  (-d_near* (top+bottom))/ top-bottom,
+        (2.0*d_near) / (right-left),                          0.0,         (right+left) / (right-left), (-d_near*(right+left))/ (right -left), 
+                                0.0,  (2.0*d_near) / (top-bottom),         (top+bottom) / (top-bottom),  (-d_near* (top+bottom))/ (top-bottom),
                                 0.0,                          0.0,  -(d_far + d_near)/(d_far - d_near), -(2.0*d_far*d_near) / (d_far-d_near),
                                 0.0,                          0.0,                                -1.0,                               d_near);
-    
-*/
+    */
+
     return glm::transpose(P) * glm::transpose(V);
     
        /**** prove ****/

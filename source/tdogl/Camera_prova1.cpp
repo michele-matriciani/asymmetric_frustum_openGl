@@ -149,58 +149,63 @@ glm::mat4 Camera::projection() const {
     int mouseX, mouseY;
     glfwGetMousePos(&mouseX, &mouseY);
 
-    glm::vec3 eye = glm::vec3(  (float)(mouseX) / 1000,
-                                -(float)(mouseY) / 1000 * 0.75f,
-                                                d_near);
+    int rh = 1; // set to -1 to right hand
 
-    std::cerr << eye.x << " , " << eye.y << " , " << eye.z << std::endl;
+    glm::vec3 eye = glm::vec3(  rh*(float)(mouseX) / 1000,
+                                rh*(float)(mouseY) / 1000 *0.75f,
+                                            (-1)* rh*   d_near);
+
+    glm::vec3 up  =           glm::vec3(0.0, 1.0, 0.0);
+    
+   // std::cerr << eye.x << " , " << eye.y << " , " << eye.z << std::endl;
  
     float d_far = eye.z + abs(_farPlane) + 1;
 
-    float dirX =  eye.x;
-    float dirY =  eye.y;
-    float dirZ =  eye.z;
+   
 
     /*** calcolo piani ****/
     
+    /*
+    float bottom = bottomP + eye.y;
+    float top = bottom - 2*bottomP;
+    float left = leftP + eye.x;
+    float right = left - 2*leftP; 
+  */
    
     
-    float top    =     topP - eye.y;
+    float top    =     topP - 0.75f*eye.y;
     float bottom =     top - 2*topP;
     float right  =   rightP - eye.x;
     float left   = right - 2*rightP;
     
     /*** vettori per view matrix ****/
-    glm::vec3 view_dir = glm::vec3(0.0, 0.0, -1.0);
+    //glm::vec3 view_dir = glm::vec3(0.0, 0.0, -1.0);
     //glm::vec3 view_dir = eye - glm::vec3(-(right+left)/2,-(top-bottom)/(2/0.75f)
      //                                      , -dirZ);
-    //glm::vec3 view_dir =     glm::vec3(dirX, dirY, dirZ);
-    glm::vec3 up       =           glm::vec3(0.0, 1.0, 0.0);
-    glm::vec3 n        =          glm::normalize(-view_dir);
 
-    //std::cerr << n.x << " , " << n.y << " , " << n.z << std::endl;
-    glm::vec3 u        =  glm::normalize(glm::cross(up, n)); 
-    glm::vec3 v        =   glm::cross(n, u);
     
-    float d_x = -(glm::dot(eye, u));
-    float d_y = -(glm::dot(eye, v));
-    float d_z = -(glm::dot(eye, n));
+    
+    glm::vec3 zaxis =   glm::normalize(-eye);
+    glm::vec3 xaxis =  glm::normalize(glm::cross(up, zaxis)); 
+    glm::vec3 yaxis =   glm::normalize(glm::cross(zaxis, xaxis));
+   
+    std::cerr << zaxis.x << " , " << zaxis.y << " , " << zaxis.z << std::endl;
+    
     
     /*** view matrix ***/
-    glm::mat4 V = glm::mat4(u.x, u.y, u.z, d_x,
-                            v.x, v.y, v.z, d_y,
-                            n.x, n.y, n.z, d_z,
-                            0.0, 0.0, 0.0, 1.0);
+    glm::mat4 view_m = glm::mat4(xaxis.x         , yaxis.x         , zaxis.x         , 0,
+                            xaxis.y         , yaxis.y         , zaxis.y         , 0,
+                            xaxis.z         , yaxis.z         , zaxis.z         , 0,
+                        rh*(-glm::dot(xaxis, eye)), rh*(-glm::dot(yaxis, eye)), rh*(-glm::dot(zaxis, eye)), 1);
 
 
     /*** perspective matrix ***/
     
-    glm::mat4 P = glm::mat4(
-        (2.0*d_near) / (right-left),                          0.0,         (right+left) / (right-left),                                  0.0, 
-                                0.0,  (2.0*d_near) / (top-bottom),         (top+bottom) / (top-bottom),                                  0.0,
-                                0.0,                          0.0,  -(d_far + d_near)/(d_far - d_near), -(2.0*d_far*d_near) / (d_far-d_near),
-                                0.0,                          0.0,                                -1.0,                                 0.0);
-    
+    glm::mat4 mp_lh = glm::mat4(
+                                2*d_near/(right-left),          0,                              0,                              0,
+                                0,                              2*d_near/(top-bottom),          0,                              0,
+                                (left+right)/rh*(left-right),   (top+bottom)/rh*(bottom-top),   d_far/rh*(d_far-d_near),        rh*1,
+                                0,                              0,                              d_near*d_far/(d_near-d_far),    0);
 /*
     glm::mat4 P = glm::mat4(
         (2.0*d_near) / (right-left),                          0.0,         (right+left) / (right-left), (-d_near*(right+left))/ right -left, 
@@ -209,7 +214,7 @@ glm::mat4 Camera::projection() const {
                                 0.0,                          0.0,                                -1.0,                               d_near);
     
 */
-    return glm::transpose(P) * glm::transpose(V);
+    return mp_lh * view_m;
     
        /**** prove ****/
     /*

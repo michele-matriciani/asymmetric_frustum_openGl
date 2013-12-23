@@ -24,6 +24,7 @@
 
 using namespace tdogl;
 
+//#define M_PI 3.1415926535897932384626433832795
 static const float MaxVerticalAngle = 85.0f; //must be less than 90 to avoid gimbal lock
 
 static inline float RadiansToDegrees(float radians) {
@@ -138,86 +139,56 @@ glm::mat4 Camera::matrix() const {
     return projection();
 }
 
-glm::mat4 Camera::projection() const {
-    float leftP   = -0.8f;
-    float rightP =  0.8f;
-    float topP    =  0.6f;
-    float bottomP = -0.6f;
 
-    float d_near = _nearPlane;
+
+glm::mat4 Camera::projection() const {
     
+
+    //std::cerr << eye.x << " , " << eye.y << " , " << eye.z << std::endl;
+
+    float alpha = M_PI/6.0f;
+    //float alpha = 30.0f; //horizontal field of view
+    float a = 0.75f;  //aspect ratio
+    float e = 1.0/glm::tan(alpha/2.0);  //focal length
+    float beta = 2.0* glm::atan(a/e);
+   
+    float n = -e;  //near plane distance
+    float f = -3*e;
+    //float f = n - 100.0f;    //far plane distance
+    
+    float x = -n/e;
+    float right_edge = x; //right edge of near plane
+    float left_edge = -x;
+    
+    float y = -(a*n)/e;
+    float top_edge = y; //top edge of near plane
+    float bottom_edge = -y;
+
     int mouseX, mouseY;
     glfwGetMousePos(&mouseX, &mouseY);
 
     glm::vec3 eye = glm::vec3(  (float)(mouseX) / 1000,
-                                -(float)(mouseY) / 1000 * 0.75f,
-                                                d_near);
+                                -(float)(mouseY) / 1000 ,
+                                                n);
 
-    std::cerr << eye.x << " , " << eye.y << " , " << eye.z << std::endl;
- 
-    float d_far = eye.z + abs(_farPlane) + 1;
+    //std::cerr << eye.x << " , " << eye.y << " , " <<  std::endl;
+    
+    right_edge = 1.0f - eye.x ;
+    left_edge  = right_edge - 2;
+    //std::cerr << n << " , " << top_edge << " , " << bottom_edge << std::endl;
+    glm::mat4 frustum = glm::frustum(left_edge, right_edge, bottom_edge, top_edge, -n, -f);
+    
+    glm::vec3 position = glm::vec3(0.0f,0.0f,0.0f);
+    
+    glm::vec3 target = glm::vec3( (right_edge+left_edge)/2,
+                                  (top_edge + bottom_edge)/2,
+                                   n ); 
+    
+    glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
+    glm::mat4 viewMatrix = glm::lookAt(position, target, up);
 
-    float dirX =  eye.x;
-    float dirY =  eye.y;
-    float dirZ =  eye.z;
+    return frustum * viewMatrix;
 
-    /*** calcolo piani ****/
-    
-   
-    
-    float top    =     topP - eye.y;
-    float bottom =     top - 2*topP;
-    float right  =   rightP - eye.x;
-    float left   = right - 2*rightP;
-    
-    /*** vettori per view matrix ****/
-    glm::vec3 view_dir = glm::vec3(0.0, 0.0, -1.0);
-    //glm::vec3 view_dir = eye - glm::vec3(-(right+left)/2,-(top-bottom)/(2/0.75f)
-     //                                      , -dirZ);
-    //glm::vec3 view_dir =     glm::vec3(dirX, dirY, dirZ);
-    glm::vec3 up       =           glm::vec3(0.0, 1.0, 0.0);
-    glm::vec3 n        =          glm::normalize(-view_dir);
-
-    //std::cerr << n.x << " , " << n.y << " , " << n.z << std::endl;
-    glm::vec3 u        =  glm::normalize(glm::cross(up, n)); 
-    glm::vec3 v        =   glm::cross(n, u);
-    
-    float d_x = -(glm::dot(eye, u));
-    float d_y = -(glm::dot(eye, v));
-    float d_z = -(glm::dot(eye, n));
-    
-    /*** view matrix ***/
-    glm::mat4 V = glm::mat4(u.x, u.y, u.z, d_x,
-                            v.x, v.y, v.z, d_y,
-                            n.x, n.y, n.z, d_z,
-                            0.0, 0.0, 0.0, 1.0);
-
-
-    /*** perspective matrix ***/
-    
-    glm::mat4 P = glm::mat4(
-        (2.0*d_near) / (right-left),                          0.0,         (right+left) / (right-left),                                  0.0, 
-                                0.0,  (2.0*d_near) / (top-bottom),         (top+bottom) / (top-bottom),                                  0.0,
-                                0.0,                          0.0,  -(d_far + d_near)/(d_far - d_near), -(2.0*d_far*d_near) / (d_far-d_near),
-                                0.0,                          0.0,                                -1.0,                                 0.0);
-    
-/*
-    glm::mat4 P = glm::mat4(
-        (2.0*d_near) / (right-left),                          0.0,         (right+left) / (right-left), (-d_near*(right+left))/ right -left, 
-                                0.0,  (2.0*d_near) / (top-bottom),         (top+bottom) / (top-bottom),  (-d_near* (top+bottom))/ top-bottom,
-                                0.0,                          0.0,  -(d_far + d_near)/(d_far - d_near), -(2.0*d_far*d_near) / (d_far-d_near),
-                                0.0,                          0.0,                                -1.0,                               d_near);
-    
-*/
-    return glm::transpose(P) * glm::transpose(V);
-    
-       /**** prove ****/
-    /*
-    float bottom = bottomP + eye.y;
-    float top = bottom - 2*bottomP;
-    float left = leftP + eye.x;
-    float right = left - 2*leftP; 
-    */
 }
 
 glm::mat4 Camera::view() const {

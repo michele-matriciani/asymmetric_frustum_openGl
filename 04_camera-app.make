@@ -149,7 +149,7 @@ $(OBJDIR)/Helper.o: source/Helper.cpp
 $(OBJDIR)/main.o: source/main.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(CXXFLAGS) -o "$@" -MF $(@:%.o=%.d) -c "$<"
-$(OBJDIR)/Camera.o: source/tdogl/Camera.cpp
+$(OBJDIR)/Camera.o: source/tdogl/myCamera.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(CXXFLAGS) -o "$@" -MF $(@:%.o=%.d) -c "$<"
 $(OBJDIR)/Program.o: source/tdogl/Program.cpp
