@@ -139,6 +139,20 @@ glm::mat4 Camera::matrix() const {
     return projection();
 }
 
+glm::mat4 tranAndScale(glm::vec3 eye) {
+    glm::mat4 translate = glm::translate(glm::mat4(), glm::vec3(-eye.x+1,0.0f,0.0f));
+    
+    glm::mat4 scale = glm::mat4( 2.0f,  0,  0,  0,
+                                    0,  1.0f,   0,  0,
+                                    0,  0,  1.0f,   0,
+                                    0,  0,  0,  1.0f    );
+    glm::mat4 translate2 = glm::translate(glm::mat4() ,
+                            glm::vec3(eye.x +1, 0.0f,0.0f) );
+
+    return translate;
+
+}
+
 
 
 glm::mat4 Camera::projection() const {
@@ -150,8 +164,8 @@ glm::mat4 Camera::projection() const {
     //float alpha = 30.0f; //horizontal field of view
     float a = 0.75f;  //aspect ratio
     float e = 1.0/glm::tan(alpha/2.0);  //focal length
-    float beta = 2.0* glm::atan(a/e);
-   
+    //float beta = 2.0* glm::atan(a/e);
+    
     float n = -e;  //near plane distance
     float f = -3*e;
     //float f = n - 100.0f;    //far plane distance
@@ -163,32 +177,57 @@ glm::mat4 Camera::projection() const {
     float y = -(a*n)/e;
     float top_edge = y; //top edge of near plane
     float bottom_edge = -y;
-
+    
+    n = -1.0f;
+    f = -5.0f;
+    right_edge = 1.0f;
+    left_edge = -1.0f;
+    top_edge = 0.75f;
+    bottom_edge = -0.75f;
+    
     int mouseX, mouseY;
     glfwGetMousePos(&mouseX, &mouseY);
 
-    glm::vec3 eye = glm::vec3(  (float)(mouseX) / 1000,
-                                -(float)(mouseY) / 1000 ,
+    glm::vec3 eye = glm::vec3(   (float)(mouseX) / 1000,
+                                -(float)(mouseY) / 1000 *0.75f,
                                                 n);
 
-    //std::cerr << eye.x << " , " << eye.y << " , " <<  std::endl;
+    std::cerr << eye.x << " , " << eye.y << " , " <<  std::endl;
     
+  
+       
     right_edge = 1.0f - eye.x ;
-    left_edge  = right_edge - 2;
-    //std::cerr << n << " , " << top_edge << " , " << bottom_edge << std::endl;
+    left_edge = right_edge - 2;
+    top_edge = 0.75f - eye.y;
+    bottom_edge = top_edge - 1.5f;
+/*
+    n = n - eye.x/10;
+    f = n -6.0f;
+*/
     glm::mat4 frustum = glm::frustum(left_edge, right_edge, bottom_edge, top_edge, -n, -f);
     
-    glm::vec3 position = glm::vec3(0.0f,0.0f,0.0f);
     
-    glm::vec3 target = glm::vec3( (right_edge+left_edge)/2,
-                                  (top_edge + bottom_edge)/2,
-                                   n ); 
+    glm::vec3 position = glm::vec3(-eye.x,-eye.y, 0.0f);
     
+    glm::vec3 target = glm::vec3(right_edge -1.0f,
+                                  top_edge - 0.75f,
+                                   -1.0f );
+    
+
     glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
     glm::mat4 viewMatrix = glm::lookAt(position, target, up);
 
-    return frustum * viewMatrix;
+    
+    
+    glm::mat4 translate = glm::translate(glm::mat4(1.0f), glm::vec3(-eye.x + right_edge-1,(-eye.y + top_edge -0.75f)/0.75f ,0.0f ));
 
+    
+    glm::mat4 proj;
+    glm::mat4 transform;
+    transform =  translate;
+    proj = transform * (frustum * viewMatrix);
+
+    return proj;
 }
 
 glm::mat4 Camera::view() const {
