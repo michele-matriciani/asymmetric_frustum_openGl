@@ -39,8 +39,8 @@ Camera::Camera() :
     _fieldOfView(45.0f),
 
     _eyeZ(1.0f),
-    _nearPlane(3.0f),
-    _farPlane(100.0f),
+    _nearPlane(1.0f),
+    _farPlane(4.0f),
     _viewportAspectRatio(4.0f/3.0f)
 {
 }
@@ -138,7 +138,7 @@ glm::mat4 Camera::matrix() const {
     //return projection() * view();
     return projection();
 }
-
+/*
 glm::mat4 tranAndScale(glm::vec3 eye) {
     glm::mat4 translate = glm::translate(glm::mat4(), glm::vec3(-eye.x+1,0.0f,0.0f));
     
@@ -152,14 +152,13 @@ glm::mat4 tranAndScale(glm::vec3 eye) {
     return translate;
 
 }
-
+*/
 
 
 glm::mat4 Camera::projection() const {
     
 
-    //std::cerr << eye.x << " , " << eye.y << " , " << eye.z << std::endl;
-
+  /*
     float alpha = M_PI/6.0f;
     //float alpha = 30.0f; //horizontal field of view
     float a = 0.75f;  //aspect ratio
@@ -177,41 +176,42 @@ glm::mat4 Camera::projection() const {
     float y = -(a*n)/e;
     float top_edge = y; //top edge of near plane
     float bottom_edge = -y;
+    */
+    float width = 1.0f;
+    float height = 0.75f;
     
-    n = -1.0f;
-    f = -5.0f;
-    right_edge = 1.0f;
-    left_edge = -1.0f;
-    top_edge = 0.75f;
-    bottom_edge = -0.75f;
+    //float f = -4.0f;
+    float right_edge = 1.0f;
+    float left_edge = -1.0f;
+    
+    float top_edge = 0.75f;
+    float bottom_edge = -0.75f;
     
     int mouseX, mouseY;
     glfwGetMousePos(&mouseX, &mouseY);
 
     glm::vec3 eye = glm::vec3(   (float)(mouseX) / 1000,
                                 -(float)(mouseY) / 1000 *0.75f,
-                                                n);
+                                                _nearPlane-1.0f);
 
-    std::cerr << eye.x << " , " << eye.y << " , " <<  std::endl;
     
-  
-       
-    right_edge = 1.0f - eye.x ;
-    left_edge = right_edge - 2;
-    top_edge = 0.75f - eye.y;
-    bottom_edge = top_edge - 1.5f;
-/*
-    n = n - eye.x/10;
-    f = n -6.0f;
-*/
-    glm::mat4 frustum = glm::frustum(left_edge, right_edge, bottom_edge, top_edge, -n, -f);
+    float n = eye.z +1.0f;
+    float f = n + 3.0f;
     
+    right_edge = width - eye.x ;
+    left_edge = right_edge - 2*width;
+    top_edge = height - eye.y;
+    bottom_edge = top_edge - 2*height;
+
+    glm::mat4 frustum = glm::frustum(left_edge, right_edge, bottom_edge, top_edge, n, f);
+   
+    std::cerr << eye.x << " , " << eye.y << " , " << n << std::endl;
     
-    glm::vec3 position = glm::vec3(-eye.x,-eye.y, 0.0f);
+    glm::vec3 position = glm::vec3(-eye.x,-eye.y,eye.z );
     
     glm::vec3 target = glm::vec3(right_edge -1.0f,
                                   top_edge - 0.75f,
-                                   -1.0f );
+                                  -n );
     
 
     glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
@@ -219,13 +219,13 @@ glm::mat4 Camera::projection() const {
 
     
     
-    glm::mat4 translate = glm::translate(glm::mat4(1.0f), glm::vec3(-eye.x + right_edge-1,(-eye.y + top_edge -0.75f)/0.75f ,0.0f ));
+    glm::mat4 translate = glm::translate(glm::mat4(1.0f), glm::vec3(-eye.x + right_edge- width,(-eye.y + top_edge - height)/height ,0  ));
 
     
     glm::mat4 proj;
     glm::mat4 transform;
     transform =  translate;
-    proj = transform * (frustum * viewMatrix);
+    proj = transform *(frustum * viewMatrix);
 
     return proj;
 }
