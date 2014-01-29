@@ -32,15 +32,16 @@ ifeq ($(config),debug)
   TARGETDIR  = bin
   TARGET     = $(TARGETDIR)/04_camera-debug
   DEFINES   += -DDEBUG
-  INCLUDES  += -Ithirdparty/stb_image
+  INCLUDES  += -Ithirdparty/stb_image -Ilib 
   CPPFLAGS  += -MMD -MP $(DEFINES) $(INCLUDES)
   CFLAGS    += $(CPPFLAGS) $(ARCH) -g -Wno-unknown-pragmas -Wall
   CXXFLAGS  += $(CFLAGS) 
   LDFLAGS   += 
   RESFLAGS  += $(DEFINES) $(INCLUDES) 
-  LIBS      += -lGL -lglfw -lGLEW
+
+  LIBS      += -lGL -lglfw -lGLEW -Llib -Wl, -rpath=/home/michele/workspace/progettoOpencv/src/build -lfaces
   LDDEPS    += 
-  LINKCMD    = $(CXX) -o $(TARGET) $(OBJECTS) $(RESOURCES) $(ARCH) $(LIBS) $(LDFLAGS)
+  LINKCMD    = $(CXX) -o $(TARGET) $(OBJECTS) $(RESOURCES) $(ARCH)  $(LIBS) $(LDFLAGS)
   define PREBUILDCMDS
   endef
   define PRELINKCMDS
@@ -54,13 +55,13 @@ ifeq ($(config),release)
   TARGETDIR  = bin
   TARGET     = $(TARGETDIR)/04_camera-release
   DEFINES   += -DNDEBUG
-  INCLUDES  += -Ithirdparty/stb_image
+  INCLUDES  += -Ithirdparty/stb_image -Ilib 
   CPPFLAGS  += -MMD -MP $(DEFINES) $(INCLUDES)
   CFLAGS    += $(CPPFLAGS) $(ARCH) -O2 -Wno-unknown-pragmas -Wall
   CXXFLAGS  += $(CFLAGS) 
-  LDFLAGS   += -s
-  RESFLAGS  += $(DEFINES) $(INCLUDES) 
-  LIBS      += -lGL -lglfw -lGLEW
+  LDFLAGS   += -s 
+  RESFLAGS  += $(DEFINES) $(INCLUDES)
+  LIBS      += -lGL -lglfw -lGLEW -Llib -Wl,-rpath=/home/michele/workspace/progettoOpencv/src/build -lfaces
   LDDEPS    += 
   LINKCMD    = $(CXX) -o $(TARGET) $(OBJECTS) $(RESOURCES) $(ARCH) $(LIBS) $(LDFLAGS)
   define PREBUILDCMDS

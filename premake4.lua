@@ -16,6 +16,7 @@ solution "04_camera"
 
 		configuration "linux"
 			links {"GL","glfw","GLEW"}
+			libdirs { "libs", "../mylibs" }
 		
 		configuration "macosx"
 			links {"GL","glfw","GLEW", "CoreFoundation.framework"}

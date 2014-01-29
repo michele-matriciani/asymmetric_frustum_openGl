@@ -33,10 +33,11 @@
 #include "tdogl/Program.h"
 #include "tdogl/Texture.h"
 #include "tdogl/Camera.h"
+ #include "face.h"
 
 // constants
 //#define M_PI 3.1415926535897932384626433832795
-const glm::vec2 SCREEN_SIZE(800, 600);
+const glm::vec2 SCREEN_SIZE(1920, 1080);
 
 // globals
 tdogl::Texture* gTexture = NULL;
@@ -74,48 +75,45 @@ static void LoadCube() {
     glGenBuffers(1, &gVBO);
     glBindBuffer(GL_ARRAY_BUFFER, gVBO);
     /*
-    float n_z = -gCamera.nearPlane();
-    float f_z = n_z - gCamera.farPlane()+ 3;
+    float n = -gCamera.nearPlane();
+    float f = n - gCamera.farPlane()+ 1;
     */
-
-    float alpha = M_PI/6.0f;
-    //float alpha = 30.0f;
+/*
+    
     float a = 0.75f;  //aspect ratio
-    float e = 1.0/glm::tan(alpha/2.0); 
-
-    float n = -e;  //near plane distance
-    std::cerr << e << std::endl;
-    float boxDepth = 10.0f;
-    float f_z = -2*e + 0.1f;
-    float n_z = n;
-    std::cerr << n_z << std::endl;
-
-    //float beta = 2.0* glm::atan(a/e);
     
-    float x = -n/e;
-    float r = x; //right edge of near plane
-    float l = -x;
-    
-    float y = -(a*n)/e;
-    float t = y; //top edge of near plane
-    float b =-y;
 
-    n_z = -1.0f;
-    f_z = -3.5f;
+*/
+    float const ar = 0.5625f;
+    float n = -1.0f;
+    float f = n - 1.5f;
+    
+    float r = 1.0f;
+    float l = -1.0f;
+    float t = ar;
+    float b = -ar;
+
+    float la = 0.3f; //lato cubo
+    
+    /** coordinate cubo vertice sx basso avanti **/
+    float x1 = -0.2f;
+    float y1 = -0.2f;
+    float z1 = -1.2f;
+
+    float x2 =  0.0f;
+    float y2 =  0.2f;
+    float z2 = -1.6f;
+
     /*
-    f_z = 13.0f;
-
-    r = 1.0f;
-    l = -1.0f;
-    t = 0.75f;
-    b = -0.75f;
+    float t = 0.75f;
+    float b = -0.75f;
 */
     std::cerr << l << " , " << r << " , " << t << " , " << b << std::endl;
-    std::cerr << n_z  << " , " << f_z << std::endl;
+    std::cerr << n << " , " << f << std::endl;
     //CONTROLLARE DIMENSIONI E POSIZIONE CUBI
 /*
     float n_z = -20.0f;
-    float f_z = -99.0f;
+    float f = -99.0f;
 */
     
     // Make a cube out of triangles (two triangles per side)
@@ -125,145 +123,146 @@ static void LoadCube() {
       
        
         // bottom
-        -0.2f,-0.2f,-1.2f,   0.0f, 0.0f,
-         0.2f,-0.2f,-1.2f,   1.0f, 0.0f,
-         0.2f,-0.2f,-1.6f,  1.0f, 1.0f,
-        -0.2f,-0.2f,-1.6f,   0.0f, 1.0f,
-        -0.2f,-0.2f,-1.2f,  0.0f, 0.0f,
-         0.2f,-0.2f,-1.6f,  1.0f, 1.0f,
+        x1   , y1   , z1   , 0.0f, 0.0f,
+        x1+la, y1   , z1   , 1.0f, 0.0f,
+        x1+la, y1   , z1-la, 1.0f, 1.0f,
+        x1   , y1   , z1-la, 0.0f, 1.0f,
+        x1   , y1   , z1   , 0.0f, 0.0f,
+        x1+la, y1   , z1-la, 1.0f, 1.0f,
 
         // top
-        -0.2f, 0.2f,-1.2f,   0.0f, 0.0f,
-         0.2f, 0.2f,-1.2f, 1.0f, 0.0f,
-         0.2f, 0.2f,-1.6f,   1.0f, 1.0f,
-        -0.2f, 0.2f,-1.6f,   0.0f, 1.0f,
-        -0.2f, 0.2f,-1.2f, 0.0f, 0.0f,
-         0.2f, 0.2f,-1.6f, 1.0f, 1.0f,
+        x1   , y1+la, z1   , 0.0f, 0.0f,
+        x1+la, y1+la, z1   , 1.0f, 0.0f,
+        x1+la, y1+la, z1-la, 1.0f, 1.0f,
+        x1   , y1+la, z1-la, 0.0f, 1.0f,
+        x1   , y1+la, z1   , 0.0f, 0.0f,
+        x1+la, y1+la, z1-la, 1.0f, 1.0f,
 
         // front
-        -0.2f,-0.2f, -1.2f,   0.0f, 0.0f,
-         0.2f,-0.2f, -1.2f,   1.0f, 0.0f,
-         0.2f, 0.2f, -1.2f,   1.0f, 1.0f,
-        -0.2f, 0.2f, -1.2f,   0.0f, 1.0f,
-        -0.2f,-0.2f, -1.2f,   0.0f, 0.0f,
-         0.2f, 0.2f, -1.2f,   1.0f, 1.0f,
+        x1   , y1   , z1   , 0.0f, 0.0f,
+        x1+la, y1   , z1   , 1.0f, 0.0f,
+        x1+la, y1+la, z1   , 1.0f, 1.0f,
+        x1   , y1+la, z1   , 0.0f, 1.0f,
+        x1   , y1   , z1   , 0.0f, 0.0f,
+        x1+la, y1+la, z1   , 1.0f, 1.0f,
 
         // back
-        -0.2f,-0.2f,-1.6f,   0.0f, 0.0f,
-         0.2f,-0.2f,-1.6f,   1.0f, 0.0f,
-         0.2f, 0.2f,-1.6f,   1.0f, 1.0f,
-        -0.2f, 0.2f,-1.6f,   0.0f, 1.0f,
-        -0.2f,-0.2f,-1.6f,   0.0f, 0.0f,
-         0.2f, 0.2f,-1.6f,   1.0f, 1.0f,
+        x1   , y1   , z1-la, 0.0f, 0.0f,
+        x1+la, y1   , z1-la, 1.0f, 0.0f,
+        x1+la, y1+la, z1-la, 1.0f, 1.0f,
+        x1   , y1+la, z1-la, 0.0f, 1.0f,
+        x1   , y1   , z1-la, 0.0f, 0.0f,
+        x1+la, y1+la, z1-la, 1.0f, 1.0f,
 
         // left
-        -0.2f,-0.2f, -1.2f,   0.0f, 0.0f,
-        -0.2f,-0.2f, -1.6f,    1.0f, 0.0f,
-        -0.2f, 0.2f, -1.6f,    1.0f, 1.0f,
-        -0.2f, 0.2f, -1.2f,   0.0f, 1.0f,
-        -0.2f,-0.2f, -1.2f,   0.0f, 0.0f,
-        -0.2f, 0.2f, -1.6f,    1.0f, 1.0f,
+        x1   , y1   , z1   , 0.0f, 0.0f,
+        x1   , y1   , z1-la, 1.0f, 0.0f,
+        x1   , y1+la, z1-la, 1.0f, 1.0f,
+        x1   , y1+la, z1   , 0.0f, 1.0f,
+        x1   , y1   , z1   , 0.0f, 0.0f,
+        x1   , y1+la, z1-la, 1.0f, 1.0f,
 
         // right
-         0.2f,-0.2f, -1.6f,   0.0f, 0.0f,
-         0.2f,-0.2f, -1.2f,    1.0f, 0.0f,
-         0.2f, 0.2f, -1.2f,    1.0f, 1.0f,
-         0.2f, 0.2f, -1.6f,   0.0f, 1.0f,
-         0.2f,-0.2f, -1.6f,    0.0f, 0.0f,
-         0.2f, 0.2f, -1.2f,   1.0f, 1.0f,
+        x1+la, y1   , z1-la, 0.0f, 0.0f,
+        x1+la, y1   , z1   , 1.0f, 0.0f,
+        x1+la, y1+la, z1   , 1.0f, 1.0f,
+        x1+la, y1+la, z1-la, 0.0f, 1.0f,
+        x1+la, y1   , z1-la, 0.0f, 0.0f,
+        x1+la, y1+la, z1   , 1.0f, 1.0f,
 
 
         //  X     Y     Z       U     V
-        // bottom
-        -0.4f, 0.0f,-2.0f,   0.0f, 0.0f,
-         0.0f, 0.0f,-2.0f,   1.0f, 0.0f,
-         0.0f, 0.0f,-2.4f,   1.0f, 1.0f,
-        -0.4f, 0.0f,-2.4f,   0.0f, 1.0f,
-        -0.4f, 0.0f,-2.0f,   0.0f, 0.0f,
-         0.0f, 0.0f,-2.4f,   1.0f, 1.0f,
+          // bottom
+        x2   , y2   , z2   , 0.0f, 0.0f,
+        x2+la, y2   , z2   , 1.0f, 0.0f,
+        x2+la, y2   , z2-la, 1.0f, 1.0f,
+        x2   , y2   , z2-la, 0.0f, 1.0f,
+        x2   , y2   , z2   , 0.0f, 0.0f,
+        x2+la, y2   , z2-la, 1.0f, 1.0f,
 
         // top
-        -0.4f, 0.4f,-2.0f,   0.0f, 0.0f,
-         0.0f, 0.4f,-2.0f,   1.0f, 0.0f,
-         0.0f, 0.4f,-2.4f,   1.0f, 1.0f,
-        -0.4f, 0.4f,-2.4f,   0.0f, 1.0f,
-        -0.4f, 0.4f,-2.0f,   0.0f, 0.0f,
-         0.0f, 0.4f,-2.4f,   1.0f, 1.0f,
+        x2   , y2+la, z2   , 0.0f, 0.0f,
+        x2+la, y2+la, z2   , 1.0f, 0.0f,
+        x2+la, y2+la, z2-la, 1.0f, 1.0f,
+        x2   , y2+la, z2-la, 0.0f, 1.0f,
+        x2   , y2+la, z2   , 0.0f, 0.0f,
+        x2+la, y2+la, z2-la, 1.0f, 1.0f,
 
         // front
-        -0.4f, 0.0f,-2.0f,    0.0f, 0.0f,
-         0.0f, 0.0f,-2.0f,     1.0f, 0.0f,
-         0.0f, 0.4f,-2.0f,   1.0f, 1.0f,
-        -0.4f, 0.4f,-2.0f,     0.0f, 1.0f,
-        -0.4f, 0.0f,-2.0f,    0.0f, 0.0f,
-         0.0f, 0.4f,-2.0f,   1.0f, 1.0f,
+        x2   , y2   , z2   , 0.0f, 0.0f,
+        x2+la, y2   , z2   , 1.0f, 0.0f,
+        x2+la, y2+la, z2   , 1.0f, 1.0f,
+        x2   , y2+la, z2   , 0.0f, 1.0f,
+        x2   , y2   , z2   , 0.0f, 0.0f,
+        x2+la, y2+la, z2   , 1.0f, 1.0f,
 
         // back
-        -0.4f, 0.0f,-2.4f,   0.0f, 0.0f,
-         0.0f, 0.0f,-2.4f,   1.0f, 0.0f,
-         0.0f,  0.4f,-2.4f,  1.0f, 1.0f,
-        -0.4f,  0.4f,-2.4f,  0.0f, 1.0f,
-        -0.4f, 0.0f,-2.4f,   0.0f, 0.0f,
-         0.0f,  0.4f,-2.4f,  1.0f, 1.0f,
+        x2   , y2   , z2-la, 0.0f, 0.0f,
+        x2+la, y2   , z2-la, 1.0f, 0.0f,
+        x2+la, y2+la, z2-la, 1.0f, 1.0f,
+        x2   , y2+la, z2-la, 0.0f, 1.0f,
+        x2   , y2   , z2-la, 0.0f, 0.0f,
+        x2+la, y2+la, z2-la, 1.0f, 1.0f,
 
         // left
-        -0.4f, 0.0f,-2.0f,   0.0f, 0.0f,
-        -0.4f, 0.0f,-2.4f,   1.0f, 0.0f,
-        -0.4f, 0.4f,-2.4f,   1.0f, 1.0f,
-        -0.4f, 0.4f,-2.0f,   0.0f, 1.0f,
-        -0.4f, 0.0f,-2.0f,   0.0f, 0.0f,
-        -0.4f, 0.4f,-2.4f,   1.0f, 1.0f,
+        x2   , y2   , z2   , 0.0f, 0.0f,
+        x2   , y2   , z2-la, 1.0f, 0.0f,
+        x2   , y2+la, z2-la, 1.0f, 1.0f,
+        x2   , y2+la, z2   , 0.0f, 1.0f,
+        x2   , y2   , z2   , 0.0f, 0.0f,
+        x2   , y2+la, z2-la, 1.0f, 1.0f,
 
         // right
-        0.0f, 0.0f,-2.4f,   0.0f, 0.0f,
-        0.0f, 0.0f,-2.0f,   1.0f, 0.0f,
-        0.0f, 0.4f,-2.0f,   1.0f, 1.0f,
-        0.0f, 0.4f,-2.4f,   0.0f, 1.0f,
-        0.0f, 0.0f,-2.4f,   0.0f, 0.0f,
-        0.0f, 0.4f,-2.0f,   1.0f, 1.0f,
+        x2+la, y2   , z2-la, 0.0f, 0.0f,
+        x2+la, y2   , z2   , 1.0f, 0.0f,
+        x2+la, y2+la, z2   , 1.0f, 1.0f,
+        x2+la, y2+la, z2-la, 0.0f, 1.0f,
+        x2+la, y2   , z2-la, 0.0f, 0.0f,
+        x2+la, y2+la, z2   , 1.0f, 1.0f,
+
     
 
          //BOX
          // bottom
-        l,b, n_z,   0.0f, 0.0f,
-         r,b, n_z,   1.0f, 0.0f,
-         r,b,f_z,   1.0f, 1.0f,
-         l,b,f_z,   0.0f, 1.0f,
-        l,b,n_z,   0.0f, 0.0f,
-        r,b, f_z,   1.0f, 1.0f,
+        l    , b    , n    , 0.0f, 0.0f,
+        r    , b    , n    , 1.0f, 0.0f,
+        r    , b    , f    , 1.0f, 1.0f,
+        l    , b    , f    , 0.0f, 1.0f,
+        l    , b    , n    , 0.0f, 0.0f,
+        r    , b    , f    , 1.0f, 1.0f,
 
         // top
-        l, t, n_z,   0.0f, 0.0f,
-         r, t, n_z,   1.0f, 0.0f,
-         r, t,f_z,   1.0f, 1.0f,
-         l, t,f_z,   0.0f, 1.0f,
-        l, t,n_z,   0.0f, 0.0f,
-        r, t, f_z,   1.0f, 1.0f,
+        l    , t    , n    , 0.0f, 0.0f,
+        r    , t    , n    , 1.0f, 0.0f,
+        r    , t    , f    , 1.0f, 1.0f,
+        l    , t    , f    , 0.0f, 1.0f,
+        l    , t    , n    , 0.0f, 0.0f,
+        r    , t    , f    , 1.0f, 1.0f,
         
 
         // back
-        l,b,f_z,   0.0f, 0.0f,
-         r,b,f_z,   1.0f, 0.0f,
-         r, t,f_z,   1.0f, 1.0f,
-         l, t,f_z,   0.0f, 1.0f,
-        l,b,f_z,   0.0f, 0.0f,
-        r, t,f_z,   1.0f, 1.0f,
+        l    , b    , f    , 0.0f, 0.0f,
+        r    , b    , f    , 1.0f, 0.0f,
+        r    , t    , f    , 1.0f, 1.0f,
+        l    , t    , f    , 0.0f, 1.0f,
+        l    , b    , f    , 0.0f, 0.0f,
+        r    , t    , f    , 1.0f, 1.0f,
 
         // left
-        l,b, n_z,   0.0f, 0.0f,
-        l,b,f_z,   1.0f, 0.0f,
-        l, t,f_z,   1.0f, 1.0f,
-        l, t,n_z,   0.0f, 1.0f,
-        l,b,n_z,   0.0f, 0.0f,
-        l, t,f_z,   1.0f, 1.0f,
+        l    , b    , n    , 0.0f, 0.0f,
+        l    , b    , f    , 1.0f, 0.0f,
+        l    , t    , f    , 1.0f, 1.0f,
+        l    , t    , n    , 0.0f, 1.0f,
+        l    , b    , n    , 0.0f, 0.0f,
+        l    , t    , f    , 1.0f, 1.0f,
 
         // right
-         r,b, f_z,   0.0f, 0.0f,
-         r,b, n_z,   1.0f, 0.0f,
-         r,t, n_z,   1.0f, 1.0f,
-         r,t,f_z,   0.0f, 1.0f,
-         r,b, f_z,   0.0f, 0.0f,
-         r, t, n_z,  1.0f, 1.0f,
+        r    , b    , f    , 0.0f, 0.0f,
+        r    , b    , n    , 1.0f, 0.0f,
+        r    , t    , n    , 1.0f, 1.0f,
+        r    , t    , f    , 0.0f, 1.0f,
+        r    , b    , f    , 0.0f, 0.0f,
+        r    , t    , n    , 1.0f, 1.0f,
 
 
         
@@ -291,10 +290,6 @@ static void LoadTexture() {
     tdogl::Bitmap bmp = tdogl::Bitmap::bitmapFromFile(ResourcePath("grid2.jpg"));
     bmp.flipVertically();
     gTexture = new tdogl::Texture(bmp);
-
-    tdogl::Bitmap bmp2 = tdogl::Bitmap::bitmapFromFile(ResourcePath("box.jpg"));
-    bmp2.flipVertically();
-    gTexture2 = new tdogl::Texture(bmp2);
 }
 
 
@@ -352,7 +347,7 @@ void Update(float secondsElapsed) {
     while(gDegreesRotated > 360.0f) gDegreesRotated -= 360.0f;*/
 
     //move position of camera based on WASD keys, and XZ keys for up and down
-    const float moveSpeed = 2.0; //units per second
+   /* const float moveSpeed = 2.0; //units per second
     if(glfwGetKey('S')){
         gCamera.offsetPosition(secondsElapsed * moveSpeed * -gCamera.forward());
     } else if(glfwGetKey('W')){
@@ -367,14 +362,14 @@ void Update(float secondsElapsed) {
         gCamera.offsetPosition(secondsElapsed * moveSpeed * -glm::vec3(0,1,0));
     } else if(glfwGetKey('X')){
         gCamera.offsetPosition(secondsElapsed * moveSpeed * glm::vec3(0,1,0));
-    }
+    }*/
     if(glfwGetKey('R')){
-        gCamera.setNearAndFarPlanes(gCamera.nearPlane() + 0.0001f , gCamera.farPlane() );
+        gCamera.setNearAndFarPlanes(gCamera.nearPlane() + 0.001f , gCamera.farPlane() );
     }
     if(glfwGetKey('G')){
-        gCamera.setNearAndFarPlanes(gCamera.nearPlane()  - 0.0001f, gCamera.farPlane() );
+        gCamera.setNearAndFarPlanes(gCamera.nearPlane() - 0.001f, gCamera.farPlane() );
     }
-
+/*
     if(glfwGetKey('C')){
         gCamera.setEyeZ(gCamera.eyeZ() - 0.001f);
     }
@@ -383,15 +378,15 @@ void Update(float secondsElapsed) {
         gCamera.setEyeZ(gCamera.eyeZ() + 0.001f);
     }
   
-
+*/
     //increase or decrease field of view based on mouse wheel
-    const float zoomSensitivity = -0.2;
+    /*const float zoomSensitivity = -0.2;
 
     float fieldOfView = gCamera.fieldOfView() + zoomSensitivity * 10 *(float)glfwGetMouseWheel();
     if(fieldOfView < 5.0f) fieldOfView = 5.0f;
     if(fieldOfView > 130.0f) fieldOfView = 130.0f;
     gCamera.setFieldOfView(fieldOfView);
-    glfwSetMouseWheel(0);
+    glfwSetMouseWheel(0);*/
 }
 
 // the program starts here
@@ -405,14 +400,14 @@ void AppMain() {
     glfwOpenWindowHint(GLFW_OPENGL_VERSION_MAJOR, 3);
     glfwOpenWindowHint(GLFW_OPENGL_VERSION_MINOR, 2);
     glfwOpenWindowHint(GLFW_WINDOW_NO_RESIZE, GL_TRUE);
-    if(!glfwOpenWindow((int)SCREEN_SIZE.x, (int)SCREEN_SIZE.y, 8, 8, 8, 8, 16, 0, GLFW_WINDOW))
+    if(!glfwOpenWindow((int)SCREEN_SIZE.x, (int)SCREEN_SIZE.y, 8, 8, 8, 8, 16, 0, /*GLFW_WINDOW*/GLFW_FULLSCREEN))
         throw std::runtime_error("glfwOpenWindow failed. Can your hardware handle OpenGL 3.2?");
 
     // GLFW settings
-    glfwDisable(GLFW_MOUSE_CURSOR);
+    //glfwDisable(GLFW_MOUSE_CURSOR);
     glfwSetMousePos(0, 0);
     glfwSetMouseWheel(0);
-
+    init();
     // initialise GLEW
     glewExperimental = GL_TRUE; //stops glew crashing on OSX :-/
     if(glewInit() != GLEW_OK)
@@ -465,8 +460,10 @@ void AppMain() {
             glPrintError();
 
         //exit program if escape key is pressed
-        if(glfwGetKey(GLFW_KEY_ESC))
+        if(glfwGetKey(GLFW_KEY_ESC)) {
+            finalize();
             glfwCloseWindow();
+        }
     }
 
     // clean up and exit

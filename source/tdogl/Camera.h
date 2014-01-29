@@ -54,7 +54,8 @@ namespace tdogl {
         float fieldOfView() const;
         void setFieldOfView(float fieldOfView);
 
-        void setEyeZ( float eyeZ );
+       
+        
 
         /**
          The closest visible distance from the camera.
@@ -65,7 +66,9 @@ namespace tdogl {
          */
         float nearPlane() const;
 
-        float eyeZ() const;
+        float prevX() const;
+        float prevY() const;
+
 
         /**
          The farthest visible distance from the camera.
@@ -111,6 +114,7 @@ namespace tdogl {
          */
         void lookAt(glm::vec3 position);
 
+        
         /**
          The width divided by the height of the screen/window/viewport
 
@@ -157,9 +161,9 @@ namespace tdogl {
         float _farPlane;
         float _viewportAspectRatio;
 
-        float _eyeZ;
-
         void normalizeAngles();
+        //void setPrev( float x,float y) const;
+        void setPrev( int x,int y) const;
     };
 
 }
