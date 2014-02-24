@@ -66,9 +66,11 @@ namespace tdogl {
          */
         float nearPlane() const;
 
-        float prevX() const;
-        float prevY() const;
+        int prevX() const;
+        int prevY() const;
+        int prevZ() const;
 
+        void init(int xS, int yS, int xC, int yC, float nP);
 
         /**
          The farthest visible distance from the camera.
@@ -163,7 +165,9 @@ namespace tdogl {
 
         void normalizeAngles();
         //void setPrev( float x,float y) const;
-        void setPrev( int x,int y) const;
+        void setPrevX( int x ) const;
+        void setPrevY( int y ) const;
+        void setPrevZ( int z ) const;
     };
 
 }

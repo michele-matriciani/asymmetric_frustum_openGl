@@ -32,14 +32,15 @@ ifeq ($(config),debug)
   TARGETDIR  = bin
   TARGET     = $(TARGETDIR)/04_camera-debug
   DEFINES   += -DDEBUG
-  INCLUDES  += -Ithirdparty/stb_image -Ilib 
+  INCLUDES  += -Ithirdparty/stb_image -I/home/michele/workspace/progettoOpencv/src
   CPPFLAGS  += -MMD -MP $(DEFINES) $(INCLUDES)
   CFLAGS    += $(CPPFLAGS) $(ARCH) -g -Wno-unknown-pragmas -Wall
   CXXFLAGS  += $(CFLAGS) 
   LDFLAGS   += 
   RESFLAGS  += $(DEFINES) $(INCLUDES) 
 
-  LIBS      += -lGL -lglfw -lGLEW -Llib -Wl, -rpath=/home/michele/workspace/progettoOpencv/src/build -lfaces
+  LIBS      += -lGL -lglfw -lGLEW -L/home/michele/workspace/progettoOpencv/src/build 
+  LIBS      += -Wl, -rpath=/home/michele/workspace/progettoOpencv/src/build -lfaces
   LDDEPS    += 
   LINKCMD    = $(CXX) -o $(TARGET) $(OBJECTS) $(RESOURCES) $(ARCH)  $(LIBS) $(LDFLAGS)
   define PREBUILDCMDS
@@ -55,13 +56,14 @@ ifeq ($(config),release)
   TARGETDIR  = bin
   TARGET     = $(TARGETDIR)/04_camera-release
   DEFINES   += -DNDEBUG
-  INCLUDES  += -Ithirdparty/stb_image -Ilib 
+  INCLUDES  += -Ithirdparty/stb_image -I/home/michele/workspace/progettoOpencv/src
   CPPFLAGS  += -MMD -MP $(DEFINES) $(INCLUDES)
   CFLAGS    += $(CPPFLAGS) $(ARCH) -O2 -Wno-unknown-pragmas -Wall
   CXXFLAGS  += $(CFLAGS) 
   LDFLAGS   += -s 
   RESFLAGS  += $(DEFINES) $(INCLUDES)
-  LIBS      += -lGL -lglfw -lGLEW -Llib -Wl,-rpath=/home/michele/workspace/progettoOpencv/src/build -lfaces
+  LIBS      += -lGL -lglfw -lGLEW -L/home/michele/workspace/progettoOpencv/src/build 
+  LIBS      += -Wl,-rpath=/home/michele/workspace/progettoOpencv/src/build -lfaces
   LDDEPS    += 
   LINKCMD    = $(CXX) -o $(TARGET) $(OBJECTS) $(RESOURCES) $(ARCH) $(LIBS) $(LDFLAGS)
   define PREBUILDCMDS
@@ -80,6 +82,7 @@ OBJECTS := \
 	$(OBJDIR)/Texture.o \
 	$(OBJDIR)/Shader.o \
 	$(OBJDIR)/Bitmap.o \
+	$(OBJDIR)/LoadObj.o \
 
 RESOURCES := \
 
@@ -151,6 +154,9 @@ $(OBJDIR)/main.o: source/main.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(CXXFLAGS) -o "$@" -MF $(@:%.o=%.d) -c "$<"
 $(OBJDIR)/Camera.o: source/tdogl/myCamera.cpp
+	@echo $(notdir $<)
+	$(SILENT) $(CXX) $(CXXFLAGS) -o "$@" -MF $(@:%.o=%.d) -c "$<"
+$(OBJDIR)/LoadObj.o: source/tdogl/LoadObj.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(CXXFLAGS) -o "$@" -MF $(@:%.o=%.d) -c "$<"
 $(OBJDIR)/Program.o: source/tdogl/Program.cpp

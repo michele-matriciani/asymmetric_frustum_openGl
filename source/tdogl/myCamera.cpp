@@ -31,23 +31,25 @@ static const float MaxVerticalAngle = 85.0f; //must be less than 90 to avoid gim
 
 //float _prevX = 0.0f;
 //float _prevY= 0.0f;
-int _prevX = 300.0f;
-int _prevY= 200.0f;
+int _prevX = 320;
+int _prevY= 240;
+float _prevZ = 1.0f;
+int count;
 
-float const xCam = 600.0f;  //CAM resolution
-float const yCam = 400.0f;
-float const xScreen = 1920.0f;  //SCENE resolution
-float const yScreen = 1080.0f;
-float const ar =  0.5625f; // 9/16 ASPECT RATIO
+float xCam = 640.0f;  //CAM resolution
+float yCam = 480.0f;
+float xScreen = 1920;  //SCENE resolution
+float yScreen = 1080;
+float ar; // 9/16 ASPECT RATIO
 
-float const xr = xScreen / xCam;
-float const yr = yScreen / yCam;
+float xr;
+float yr;
 
-float const width = 1.0f;   //FRUSTUM width and height
-float const height = ar;
+float width = 1.0f;   //FRUSTUM width and height
+float height;
 
 //
-float n, f, right_edge, left_edge, top_edge, bottom_edge;
+float n, nP, f, right_edge, left_edge, top_edge, bottom_edge;
 
 glm::vec3 eye, positionV, target;
 
@@ -71,6 +73,18 @@ Camera::Camera() :
 {
 }
 
+void Camera::init(int xS, int yS, int xC, int yC,float nPl) {
+    xScreen = xS;
+    yScreen = yS;
+    xCam    = xC;
+    yCam    = yC;
+    nP      = nPl;
+    ar      = yScreen/xScreen; 
+    xr      = xScreen/xCam;
+    yr      = yScreen/yCam;
+    height  = ar;
+}
+
 const glm::vec3& Camera::position() const {
     return _position;
 }
@@ -79,12 +93,6 @@ void Camera::setPosition(const glm::vec3& position) {
     _position = position;
 }
 
-float Camera::prevX() const {
-    return _prevX;
-}
-float Camera::prevY() const {
-    return _prevY;
-}
 
 void Camera::offsetPosition(const glm::vec3& offset) {
     _position += offset;
@@ -155,134 +163,6 @@ glm::vec3 Camera::right() const {
     return glm::vec3(right);
 }
 
-glm::vec3 Camera::up() const {
-    glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
-    //glm::vec4 up = glm::inverse(orientation()) * glm::vec4(0,1,0,1);
-    return glm::vec3(up);
-}
-
-glm::mat4 Camera::matrix() const {
-    //return projection() * view();
-    return projection();
-}
-
-
-
-glm::mat4 Camera::projection() const {
-    
-
-/*
-    float alpha = M_PI/6.0f;
-    //float alpha = 30.0f; //horizontal field of view
-*/
-    
-    
-    int coordX = 0, coordY= 0; 
-    bool change = true;
-    change = getFaceCoord( &coordX, &coordY );
-    
-    /*
-    int mouseX, mouseY;
-    glfwGetMousePos(&mouseX, &mouseY);
-
-    glm::vec3 eye = glm::vec3(   (float)(mouseX) / 1000,
-                                -(float)(mouseY) / 1000 *0.75f,
-                                                _nearPlane-1.0f);
-
-    */
-    
-    if (coordX == 0 && coordY == 0)
-        change = false;
-
-    
-
-    if ( change ) {
-        int difX = abs( coordX - prevX() );
-        int difY = abs( coordY - prevY() );
-        int err = 2;
-        if ( difX < err && difY < err ) {// filtro  
-            coordX = prevX();
-            coordY = prevY();
-        }
-        else 
-            setPrev( coordX, coordY );
-    }
-    else {
-        coordX = prevX();
-        coordY = prevY();
-    }
-
-    std::cerr << coordX << " , " << coordY << std::endl;
-
-
-    float x = (( (float)(coordX) - 300.0f ) / 100.0f) / (xr*ar);
-    float y = (( (float)(coordY) - 320.0f ) / 100.0f) / (yr*ar);
-    
-    /*if (change) {
-        x = (( (float)(coordX) - 300.0f ) / 100.0f) / xr;
-        y = (( (float)(coordY) - 220.0f ) / 100.0f) / yr;
-        float difX = x - prevX();
-        float difY = y - prevY();
-        float err = 0.015f;
-        if( difX > err && difX < -err &&
-            difY > err && difY < -err ){
-            //std::cerr << difX << " , " << difY << std::endl;
-            x = prevX();
-            y = prevY();
-
-
-        }
-        else {
-            setPrev(x,y);
-        }
-    }
-    else {
-        x = prevX();
-        y = prevY();
-    }*/
-
-    //std::cerr << x << " , " << y << std::endl;
-
-    eye = glm::vec3(                x,
-                                    y,
-                      _nearPlane-1.0f );
-
-    
-    //FRUSTUM COORDINATES
-    n = eye.z +1.0f;
-    f = n + 2.0f;
-    
-    right_edge = width - eye.x ;
-    left_edge = right_edge - 2*width;
-    top_edge = height - eye.y;
-    bottom_edge = top_edge - 2*height;
-
-    
-    //std::cerr << eye.x << " , " << eye.y << " , " << n << std::endl;
-    
-    //POSITION VECTOR
-    positionV = glm::vec3( -eye.x, -eye.y, eye.z );
-    
-    //TARGET VECTOR
-    target = glm::vec3(  right_edge -1.0f,
-                            top_edge - ar,
-                                       -n );
-    
-    //FRUSTUM MATRIX
-    frustum = glm::frustum(left_edge, right_edge, bottom_edge, top_edge, n, f);
-    
-    //VIEWMATRIX
-    viewMatrix = glm::lookAt(positionV, target, up());
-
-    //TRANSLATION MATRIX
-    translate = glm::translate(                      glm::mat4(1.0f), 
-                               glm::vec3(-eye.x + right_edge - width,
-                                 (-eye.y + top_edge - height)/height,
-                                                                   0 ));
-
-    return translate * (frustum * viewMatrix);
-}
-
 glm::mat4 Camera::view() const {
     return orientation() * glm::translate(glm::mat4(), -_position);
 }
@@ -299,8 +179,170 @@ void Camera::normalizeAngles() {
         _verticalAngle = -MaxVerticalAngle;
 }
 
-//void Camera::setPrev( float x,float y) const {
-void Camera::setPrev( int x, int y) const {
+
+
+/*** USED FUNCTIONS ***/
+
+
+glm::mat4 Camera::matrix() const {
+    //return projection() * view();
+    return projection();
+}
+
+
+glm::vec3 Camera::up() const {
+    glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
+    //glm::vec4 up = glm::inverse(orientation()) * glm::vec4(0,1,0,1);
+    return glm::vec3(up);
+}
+
+int Camera::prevX() const {
+    return _prevX;
+}
+int Camera::prevY() const {
+    return _prevY;
+}
+int Camera::prevZ() const {
+    return _prevZ;
+}
+
+
+void Camera::setPrevX( int x ) const {
     _prevX = x;
+}
+void Camera::setPrevY( int y ) const {
     _prevY = y;
+}
+void Camera::setPrevZ( int z ) const {
+    _prevZ = z;
+}
+
+
+float interpolate ( int cz ) {
+/*
+    if ( cx < 0)
+        cx *= -1;
+    if ( cz < 0)
+        cz *= -1;
+    return (cx)/(cz);
+*/
+    // z max = 480;
+    // z giusta = 162;
+    return ( (-162+480)*cz*cz + 480 ) /10000000.0f;
+
+}
+
+
+glm::mat4 Camera::projection() const {
+    
+/*
+    float alpha = M_PI/6.0f;
+    //float alpha = 30.0f; //horizontal field of view
+*/
+    
+    int coordX = 0, coordY = 0, coordZ = 0; 
+    bool change = true;
+    change = getFaceCoord( &coordX, &coordY, &coordZ  );
+    
+    /*
+    int mouseX, mouseY;
+    glfwGetMousePos(&mouseX,   &mouseY);
+
+    glm::vec3 eye = glm::vec3(   (float)(mouseX) / 1000,
+                                -(float)(mouseY) / 1000 *0.75f,
+                                                 _nearPlane-1.0f);
+ 
+    */
+    if ( coordX == 0 && coordY == 0 && coordZ ==0 )
+        change = false;
+    
+
+    if ( change ) {
+        int difZ = abs( coordZ - prevZ() );
+        int difX = abs( coordX - prevX() );
+        int difY = abs( coordY - prevY() );
+        int err = 3;
+        int errZ = 7;
+        
+        //std::cerr << difX << " , " << difY << " , " << difZ << std::endl;
+        
+        if ( difZ < errZ /*|| difZ > maxErrZ*/) {
+            coordZ = prevZ();
+        }
+        else 
+            setPrevZ(coordZ);
+        
+        if ( difX < err /*|| difX > maxErr*/) {
+            coordX = prevX();
+        }
+        else 
+            setPrevX(coordX);
+
+        if ( difY < err /*|| difY > maxErr*/) {
+            coordY = prevY();
+        }
+        else 
+            setPrevY(coordY);
+        
+    }
+
+    else {
+        coordX = prevX();
+        coordY = prevY();
+        coordZ = prevZ();
+    }
+
+    
+    float c = interpolate(coordZ);
+    float z = (float)coordZ / 100.0f ;
+    
+    // con -320.0f non e' allineato
+    float x = ((( (float)(coordX) - 320.0f ) / 100.0f ) / (xr*ar));
+    
+    //x = x*c;
+
+    float y = ((( (float)(coordY) - 240.0f ) / 100.0f ) / (yr*ar));
+    
+    
+    
+    std::cerr << x << " , " << y <<  " , " << coordZ << " , "<< c <<std::endl;
+    
+
+    eye = glm::vec3(                x,
+                                    y,
+                                z-1.0f );
+
+    //std::cerr << coordX << " , " << coordY << " , " << z <<std::endl;
+    //FRUSTUM COORDINATES
+    n = eye.z + nP;
+    f = n     + 1000.0f;
+    
+    right_edge  = width      - eye.x ;
+    left_edge   = right_edge - 2*width;
+    top_edge    = height     - eye.y;
+    bottom_edge = top_edge   - 2*height;
+
+
+    //POSITION VECTOR
+    positionV = glm::vec3( -eye.x, -eye.y, eye.z);
+    
+    //TARGET VECTOR
+    target    = glm::vec3( right_edge - width,
+                            top_edge - height,
+                                         -n-1 );
+    
+    //FRUSTUM MATRIX
+    frustum   = glm::frustum(left_edge, right_edge, bottom_edge,
+                                                 top_edge, n, f);
+    
+    //VIEWMATRIX
+    viewMatrix = glm::lookAt(positionV, target, up());
+
+    //TRANSLATION MATRIX
+    translate = glm::translate(                      glm::mat4(1.0f), 
+                               glm::vec3(-eye.x + right_edge - width,
+                                 (-eye.y + top_edge - height)/height,
+                                                           1.0f));
+
+    return translate  * frustum * viewMatrix;
 }
