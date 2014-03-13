@@ -28,10 +28,17 @@
  		public:
  			LoadObj();
 
- 			bool loadObj(const std::string& filename,
+ 			bool loadMtl( std::string filename,
+									float Ka[],    
+    								float Kd[],    
+    								float Ks[],    
+    								float &Ns);
+
+ 			int loadObj(const std::string filename,
     				std::vector < glm::vec3 > & out_vertices,
     				std::vector < glm::vec2 > & out_uvs,
-    				std::vector < glm::vec3 > & out_normals);
+    				std::vector < glm::vec3 > & out_normals,
+    				int n);
 
  		private:
  	};

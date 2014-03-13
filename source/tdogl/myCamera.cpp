@@ -21,19 +21,27 @@
 #include "Camera.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
+
 #include "face.h"
+#include "Filter.h" //obj loader
 
 using namespace tdogl;
 
 //#define M_PI 3.1415926535897932384626433832795
 static const float MaxVerticalAngle = 85.0f; //must be less than 90 to avoid gimbal lock
 
+Filter filter;
 
 //float _prevX = 0.0f;
 //float _prevY= 0.0f;
 int _prevX = 320;
 int _prevY= 240;
 float _prevZ = 1.0f;
+
+int _prevX2 = 320;
+int _prevY2= 240;
+float _prevZ2 = 1.0f;
+
 int count;
 
 float xCam = 640.0f;  //CAM resolution
@@ -206,16 +214,17 @@ int Camera::prevZ() const {
     return _prevZ;
 }
 
+int Camera::prevX2() const {
+    return _prevX2;
+}
+int Camera::prevY2() const {
+    return _prevY2;
+}
+int Camera::prevZ2() const {
+    return _prevZ2;
+}
 
-void Camera::setPrevX( int x ) const {
-    _prevX = x;
-}
-void Camera::setPrevY( int y ) const {
-    _prevY = y;
-}
-void Camera::setPrevZ( int z ) const {
-    _prevZ = z;
-}
+
 
 
 float interpolate ( int cz ) {
@@ -232,18 +241,45 @@ float interpolate ( int cz ) {
 
 }
 
+void Camera::setX(glm::vec3 & f, int &coordX) const{
+    coordX  = f[0];
+    _prevX  = f[1];
+    _prevX2 = f[2];
+}
+
+void Camera::setY(glm::vec3 & f, int &coordY) const{
+    coordY  = f[0];
+    _prevY  = f[1];
+    _prevY2 = f[2];
+}
+void Camera::setZ(glm::vec3 & f, int &coordZ) const {
+    coordZ  = f[0];
+    _prevZ  = f[1];
+    _prevZ2 = f[2];
+}
 
 glm::mat4 Camera::projection() const {
     
-/*
-    float alpha = M_PI/6.0f;
-    //float alpha = 30.0f; //horizontal field of view
-*/
+
     
     int coordX = 0, coordY = 0, coordZ = 0; 
     bool change = true;
     change = getFaceCoord( &coordX, &coordY, &coordZ  );
+
+    glm::vec3 fX = glm::vec3( coordX, prevX(), prevX2());
+    glm::vec3 fY = glm::vec3( coordY, prevY(), prevY2());
+    glm::vec3 fZ = glm::vec3( coordZ, prevZ(), prevZ2());
+
+    filter.filter(fX,4,8);
+    filter.filter(fY,4,8);
+    filter.filter(fZ,7,15);
+
+    setX(fX,coordX);
+    setY(fY,coordY);
+    setZ(fZ,coordZ);
     
+
+
     /*
     int mouseX, mouseY;
     glfwGetMousePos(&mouseX,   &mouseY);
@@ -253,47 +289,9 @@ glm::mat4 Camera::projection() const {
                                                  _nearPlane-1.0f);
  
     */
-    if ( coordX == 0 && coordY == 0 && coordZ ==0 )
-        change = false;
     
-
-    if ( change ) {
-        int difZ = abs( coordZ - prevZ() );
-        int difX = abs( coordX - prevX() );
-        int difY = abs( coordY - prevY() );
-        int err = 3;
-        int errZ = 7;
-        
-        //std::cerr << difX << " , " << difY << " , " << difZ << std::endl;
-        
-        if ( difZ < errZ /*|| difZ > maxErrZ*/) {
-            coordZ = prevZ();
-        }
-        else 
-            setPrevZ(coordZ);
-        
-        if ( difX < err /*|| difX > maxErr*/) {
-            coordX = prevX();
-        }
-        else 
-            setPrevX(coordX);
-
-        if ( difY < err /*|| difY > maxErr*/) {
-            coordY = prevY();
-        }
-        else 
-            setPrevY(coordY);
-        
-    }
-
-    else {
-        coordX = prevX();
-        coordY = prevY();
-        coordZ = prevZ();
-    }
-
     
-    float c = interpolate(coordZ);
+    //float c = interpolate(coordZ);
     float z = (float)coordZ / 100.0f ;
     
     // con -320.0f non e' allineato
@@ -305,7 +303,7 @@ glm::mat4 Camera::projection() const {
     
     
     
-    std::cerr << x << " , " << y <<  " , " << coordZ << " , "<< c <<std::endl;
+    std::cerr << x << " , " << y <<  " , " << coordZ <<std::endl;
     
 
     eye = glm::vec3(                x,
@@ -314,7 +312,7 @@ glm::mat4 Camera::projection() const {
 
     //std::cerr << coordX << " , " << coordY << " , " << z <<std::endl;
     //FRUSTUM COORDINATES
-    n = eye.z + nP;
+    n = -eye.z + nP;
     f = n     + 1000.0f;
     
     right_edge  = width      - eye.x ;
@@ -324,7 +322,7 @@ glm::mat4 Camera::projection() const {
 
 
     //POSITION VECTOR
-    positionV = glm::vec3( -eye.x, -eye.y, eye.z);
+    positionV = glm::vec3( -eye.x, -eye.y, -eye.z);
     
     //TARGET VECTOR
     target    = glm::vec3( right_edge - width,

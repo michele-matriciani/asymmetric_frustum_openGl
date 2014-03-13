@@ -70,6 +70,10 @@ namespace tdogl {
         int prevY() const;
         int prevZ() const;
 
+        int prevX2() const;
+        int prevY2() const;
+        int prevZ2() const;
+
         void init(int xS, int yS, int xC, int yC, float nP);
 
         /**
@@ -165,9 +169,10 @@ namespace tdogl {
 
         void normalizeAngles();
         //void setPrev( float x,float y) const;
-        void setPrevX( int x ) const;
-        void setPrevY( int y ) const;
-        void setPrevZ( int z ) const;
+        void setX( glm::vec3 & f, int & coordX ) const;
+        void setY( glm::vec3 & f, int & coordX  ) const;
+        void setZ( glm::vec3 & f, int & coordX  ) const;
+
     };
 
 }

@@ -83,6 +83,7 @@ OBJECTS := \
 	$(OBJDIR)/Shader.o \
 	$(OBJDIR)/Bitmap.o \
 	$(OBJDIR)/LoadObj.o \
+	$(OBJDIR)/Filter.o \
 
 RESOURCES := \
 
@@ -157,6 +158,9 @@ $(OBJDIR)/Camera.o: source/tdogl/myCamera.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(CXXFLAGS) -o "$@" -MF $(@:%.o=%.d) -c "$<"
 $(OBJDIR)/LoadObj.o: source/tdogl/LoadObj.cpp
+	@echo $(notdir $<)
+	$(SILENT) $(CXX) $(CXXFLAGS) -o "$@" -MF $(@:%.o=%.d) -c "$<"
+$(OBJDIR)/Filter.o: source/tdogl/Filter.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(CXXFLAGS) -o "$@" -MF $(@:%.o=%.d) -c "$<"
 $(OBJDIR)/Program.o: source/tdogl/Program.cpp
