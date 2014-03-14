@@ -1,11 +1,8 @@
 #include "Filter.h"
-#include <stdexcept>
-#include <cmath>
 #include <GL/glfw.h>
 #include <vector>
 #include <iostream>
-#include <stdio.h>
-#include <string.h>
+
 
 using namespace tdogl;
 
@@ -13,6 +10,7 @@ Filter::Filter()
     
 {
 }
+
 
 
 bool Filter::filter(glm::vec3 &cVec, int erMin, int erMax) {
@@ -30,7 +28,7 @@ bool Filter::filter(glm::vec3 &cVec, int erMin, int erMax) {
 	if ( ( dif >= -erMin && dif <= erMin ) ) { 
     	
 		coord = p;    
-    
+    	
     }
 
     else if ( dif >= -erMax && dif <= erMax )  {
@@ -41,9 +39,13 @@ bool Filter::filter(glm::vec3 &cVec, int erMin, int erMax) {
     	else {
     		coord = p + (erMax + erMin)/3;
     	}
+    	//p = coord;
+    	pp = p;
+
     }   
     else {
     	p = coord;
+    	pp = p;
     }  
 
     cVec[0] = coord;

@@ -396,7 +396,7 @@ static void LoadCube(float nP, float fB,float ar) {
         //  X     Y     Z       U     V
 
       
-       
+       /*
         // bottom
         x1   , y1   , z1   , 0.0f, 0.0f,   0.0f, -1.0f, 0.0f,
         x1+la, y1   , z1   , 1.0f, 0.0f,   0.0f, -1.0f, 0.0f,
@@ -444,8 +444,8 @@ static void LoadCube(float nP, float fB,float ar) {
         x1+la, y1+la, z1-la, 0.0f, 1.0f,   1.0f, 0.0f, 0.0f,
         x1+la, y1   , z1-la, 0.0f, 0.0f,   1.0f, 0.0f, 0.0f,
         x1+la, y1+la, z1   , 1.0f, 1.0f,   1.0f, 0.0f, 0.0f,
-
-
+    */
+    /*
         //  X     Y     Z       U     V
           // bottom
         x2   , y2   , z2   , 0.0f, 0.0f,   0.0f, -1.0f, 0.0f,
@@ -494,7 +494,7 @@ static void LoadCube(float nP, float fB,float ar) {
         x2+la, y2+la, z2-la, 0.0f, 1.0f,   1.0f, 0.0f, 0.0f,
         x2+la, y2   , z2-la, 0.0f, 0.0f,   1.0f, 0.0f, 0.0f,
         x2+la, y2+la, z2   , 1.0f, 1.0f,   1.0f, 0.0f, 0.0f,
-
+    */
     
 
          //BOX
@@ -542,15 +542,15 @@ static void LoadCube(float nP, float fB,float ar) {
     };
 /*
     GLfloat plane[] = {
-        x1 +1  , y1   , z1   , 0.0f, 0.0f,
-        x1+la+1, y1   , z1   , 1.0f, 0.0f,
-        x1+la+1, y1+la, z1   , 1.0f, 1.0f,
-        x1  +1 , y1+la, z1   , 0.0f, 1.0f,
-        x1  +1 , y1   , z1   , 0.0f, 0.0f,
-        x1+la+1, y1+la, z1   , 1.0f, 1.0f,
+        x1 +1.5  , y1   , z1-2   , 0.0f, 0.0f,
+        x1+la+1.5, y1   , z1-2   , 1.0f, 0.0f,
+        x1+la+1.5, y1+la, z1-2   , 1.0f, 1.0f,
+        x1  +1.5 , y1+la, z1-2   , 0.0f, 1.0f,
+        x1  +1.5 , y1   , z1-2   , 0.0f, 0.0f,
+        x1+la+1.5, y1+la, z1-2   , 1.0f, 1.0f,
 
-    };
-*/
+    };*/
+
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
 
     // connect the xyz to the "vert" attribute of the vertex shader
@@ -570,7 +570,7 @@ static void LoadCube(float nP, float fB,float ar) {
 
 
     /***BIND SECOND OBJECT ***/
-    /*glGenVertexArrays(1, &gVAO1);
+   /* glGenVertexArrays(1, &gVAO1);
     glBindVertexArray(gVAO1);
     
     // make and bind the VBO
@@ -605,7 +605,7 @@ static void RenderInstance(const ModelInstance& inst) {
     
     ModelAsset* asset = inst.asset;
     tdogl::Program* shaders = asset->shaders;
-    std::cerr << "CIAO" << std::endl;
+    
     //bind the shaders
     shaders->use();
 
@@ -613,15 +613,15 @@ static void RenderInstance(const ModelInstance& inst) {
     shaders->setUniform("camera", gCamera.matrix());
 
     shaders->setUniform("model", inst.transform);
+    //bind the texture
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, asset->texture->object());
     shaders->setUniform("tex", 0); //set to 0 because the texture will be bound to GL_TEXTURE0
     //shaders->setUniform("light.position", gLight.position);
     //shaders->setUniform("light.intensities", gLight.intensities);
 
   
-    //bind the texture
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, asset->texture->object());
-    std::cerr << asset->drawCount << std::endl;
+    
     
     //bind VAO and draw
     glBindVertexArray(asset->vao);
@@ -639,6 +639,7 @@ static void Render() {
     // clear everything
     glClearColor(0, 0, 0, 1); // black
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    
     
 
     /*** RENDER FIRST OBJECT ***/
@@ -659,11 +660,13 @@ static void Render() {
     glBindVertexArray(gVAO);
     // draw the VAO
     //glDrawArrays(GL_TRIANGLES, 0, 6*2*3);
-    glDrawArrays(GL_TRIANGLES, 0, 17*2*3  );
+    glDrawArrays(GL_TRIANGLES, 0, 5*2*3  );
     // unbind the VAO, the program and the texture
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D, 0);
     gProgram->stopUsing();
+
+
 
 
 
@@ -719,8 +722,8 @@ void AppMain(int screenX,int screenY,int camX,int camY,float n,float fB) {
     glfwOpenWindowHint(GLFW_OPENGL_VERSION_MAJOR, 3);
     glfwOpenWindowHint(GLFW_OPENGL_VERSION_MINOR, 2);
     glfwOpenWindowHint(GLFW_WINDOW_NO_RESIZE, GL_TRUE);
-    if(!glfwOpenWindow((int)SCREEN_SIZE.x, (int)SCREEN_SIZE.y
-                        /*screenX, screenY*/, 8, 8, 8, 8, 16, 0, /*GLFW_WINDOW*/GLFW_FULLSCREEN))
+    if(!glfwOpenWindow(/*(int)SCREEN_SIZE.x, (int)SCREEN_SIZE.y*/
+                        screenX, screenY, 8, 8, 8, 8, 16, 0, /*GLFW_WINDOW*/GLFW_FULLSCREEN))
         throw std::runtime_error("glfwOpenWindow failed. Can your hardware handle OpenGL 3.2?");
     
     // GLFW settings
@@ -774,7 +777,7 @@ void AppMain(int screenX,int screenY,int camX,int camY,float n,float fB) {
 
     // setup gCamera
     gCamera.setPosition(glm::vec3(0,0,4));
-    gCamera.setViewportAspectRatio(SCREEN_SIZE.x / SCREEN_SIZE.y);
+    gCamera.setViewportAspectRatio((float)(screenX) / (float)(screenY));
 
     //gLight.position = gCamera.position();
     //gLight.position = glm::vec3( 0.5f, 0.5f, -n+2);

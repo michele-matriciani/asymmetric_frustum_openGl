@@ -139,11 +139,11 @@ int LoadObj::loadObj(const std::string filename,
 	    if ( strcmp( lineHeader, "v" ) == 0 ){
 		    glm::vec3 vertex;
 		    int r = fscanf(file, "%f %f %f\n", &vertex.x , &vertex.y, &vertex.z );
-		    vertex.z -= n;
-
+		    vertex.z -= n-2;
+		    /*
 		    vertex.x = ((float)((int)(vertex.x*100)))/100;
 		    vertex.y = ((float)((int)(vertex.y*100)))/100;
-		    vertex.z = ((float)((int)(vertex.z*100)))/100;
+		    vertex.z = ((float)((int)(vertex.z*100)))/100;*/
 		    /*
 		    vertex.x = (int)vertex.x;
 		    vertex.y = (int)vertex.y;

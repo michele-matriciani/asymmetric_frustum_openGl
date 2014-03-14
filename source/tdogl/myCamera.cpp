@@ -270,8 +270,8 @@ glm::mat4 Camera::projection() const {
     glm::vec3 fY = glm::vec3( coordY, prevY(), prevY2());
     glm::vec3 fZ = glm::vec3( coordZ, prevZ(), prevZ2());
 
-    filter.filter(fX,4,8);
-    filter.filter(fY,4,8);
+    filter.filter(fX,5,8);
+    filter.filter(fY,5,8);
     filter.filter(fZ,7,15);
 
     setX(fX,coordX);
@@ -287,9 +287,9 @@ glm::mat4 Camera::projection() const {
     glm::vec3 eye = glm::vec3(   (float)(mouseX) / 1000,
                                 -(float)(mouseY) / 1000 *0.75f,
                                                  _nearPlane-1.0f);
- 
-    */
-    
+    coordX = mouseX;
+    coordY = mouseY;
+*/
     
     //float c = interpolate(coordZ);
     float z = (float)coordZ / 100.0f ;
@@ -305,12 +305,13 @@ glm::mat4 Camera::projection() const {
     
     std::cerr << x << " , " << y <<  " , " << coordZ <<std::endl;
     
-
+    //EYE VECTOR
     eye = glm::vec3(                x,
                                     y,
                                 z-1.0f );
 
     //std::cerr << coordX << " , " << coordY << " , " << z <<std::endl;
+    
     //FRUSTUM COORDINATES
     n = -eye.z + nP;
     f = n     + 1000.0f;
